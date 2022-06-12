@@ -1,9 +1,22 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "shader.h"
 
-int gWindowSizeX = 640;
-int gWindowSizeY = 480;
+int gWindowSizeX = 640; // ширина окна
+int gWindowSizeY = 480; // высота окна
+
+GLfloat point[] = {
+    0.0,0.5,0.0,
+    0.5,-0.5,0.0,
+    -0.5,-0.5,0.0
+};
+
+GLfloat colors[] = {
+    1.0,0.0,0.0,
+    0.0,1.0,0.0,
+    0.0,0.0,1.0
+};
 
 void glfwWindowSizeCallback(GLFWwindow* window, int width, int height)
 {

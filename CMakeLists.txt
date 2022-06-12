@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
 set(PROJECT_NAME opengl_cmake)
 project(${PROJECT_NAME})
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/shader.h)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
