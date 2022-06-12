@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>external\glm\glm\glm.hpp
 #include <iostream>
 #include "shader.h"
 
@@ -17,6 +18,8 @@ GLfloat colors[] = {
     0.0,1.0,0.0,
     0.0,0.0,1.0
 };
+
+Shader firstShader("shaders/shader.vs","shaders/shader.fs");
 
 void glfwWindowSizeCallback(GLFWwindow* window, int width, int height)
 {
