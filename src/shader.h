@@ -13,11 +13,16 @@
 class Shader
 {
 public:
-    unsigned int ID;
+    GLuint ID;
 	
     // Конструктор генерирует шейдер на лету
-    Shader(const char* vertexPath, const char* fragmentPath)
+    Shader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& exeFullPath)
     {
+        size_t found = exeFullPath.find_last_of("/\\");
+        std::string exePath = exeFullPath.substr(0, found);
+        std::string vertexFullPath = exePath + "\\" + vertexPath;
+        std::string fragmentFullPath = exePath + "\\" + fragmentPath;
+        
         // Этап №1: Получение исходного кода вершинного/фрагментного шейдера из переменной filePath
         std::string vertexCode;
         std::string fragmentCode;
@@ -30,8 +35,8 @@ public:
         try 
         {
             // Открываем файлы
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
+            vShaderFile.open(vertexFullPath);
+            fShaderFile.open(fragmentFullPath);
             std::stringstream vShaderStream, fShaderStream;
 			
             // Считываем содержимое файловых буферов в потоки 
@@ -51,10 +56,10 @@ public:
             std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
         }
         const char* vShaderCode = vertexCode.c_str();
-        const char * fShaderCode = fragmentCode.c_str();
+        const char* fShaderCode = fragmentCode.c_str();
 		
         // Этап №2: Компилируем шейдеры
-        unsigned int vertex, fragment;
+        GLuint vertex, fragment;
 		
         // Вершинный шейдер
         vertex = glCreateShader(GL_VERTEX_SHADER);
