@@ -8,7 +8,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(${PROJECT_NAME}
     src/main.cpp
     src/shader.h
-    src/stb_image.h)
+    src/stb_image.h
+    src/camera.h)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
