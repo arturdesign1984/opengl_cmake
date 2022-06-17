@@ -28,7 +28,7 @@
 
 - теперь добавляем библиотеку в проект, открываем **CMakeLists.txt**:
 
-    add_subdirectory(external/glm)
-    target_link_libraries(${PROJECT_NAME} glm)
+        add_subdirectory(external/glm)
+        target_link_libraries(${PROJECT_NAME} glm)
 
 - готово!
