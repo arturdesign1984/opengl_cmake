@@ -124,7 +124,7 @@ private:
         front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
         Front = glm::normalize(front);
         // Также пересчитываем вектор-вправо и вектор-вверх
-        Right = glm::normalize(glm::cross(Front, WorldUp));  // Нормализуем векторы, потому что их длина становится стремится к 0 тем больше, чем больше вы смотрите вверх или вниз, что приводит к более медленному движению.
+        Right = glm::normalize(glm::cross(Front, WorldUp));  // Нормализуем векторы, потому что их длина начинает стремится к 0 тем больше, чем больше вы смотрите вверх или вниз, что приводит к более медленному движению.
         Up    = glm::normalize(glm::cross(Right, Front));
     }
 };

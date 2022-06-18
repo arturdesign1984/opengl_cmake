@@ -41,7 +41,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 // константы
 int windowSizeX = 1920; // ширина окна
 int windowSizeY = 1080; // высота окна
-int numberOfFrames = 50; // количество рамок в глубину
+int numberOfFrames = 20000; // количество рамок в глубину
 
 // камера
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -162,7 +162,7 @@ class FrameRainbowTwistRGB
         #ifdef DEBUG
         else
         {
-            std::cout << "error in twistFrameColors()" << std::endl;
+            std::cout << "error in class FrameRainbowTwistRGB --> twistFrameColors()" << std::endl;
         }
         #endif
     }
@@ -278,7 +278,7 @@ int main(int argc, char** argv)
     
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(-0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     // glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);                          // положение камеры
     // glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);                       // целевая позиция
@@ -291,16 +291,39 @@ int main(int argc, char** argv)
     glm::mat4 view;
     glm::mat4 projection;
 
-    std::deque<glm::mat4> frames;
+    int directionX = 1;
+    int directionY = 1;
+    int directionZ = 1;
+
+    std::deque<glm::vec4> frames;
     for(int k = 0; k < numberOfFrames; k++)
     {
-        float deep = -1 + 1/(k+1);
-        float angle = 10 * sin(glfwGetTime());//glm::sin(k/5);
-        model = glm::rotate(model, glm::radians(angle), glm::vec3(0.2f, 0.2f, 0.2f));
-        model = glm::translate(model, glm::vec3(0.0,0.0,deep*2));
-        frames.push_back(model);
+        directionX *= (k%100 == 0) ? (-1) : (1);
+        directionY *= (k%100 == 0) ? (-1) : (1);
+        directionZ *= (k%100 == 0) ? (-1) : (1);
+
+        float deep = -1.0;//-1 + 1/(k * directionDeep + 1); // sin(glfwGetTime() * directionDeep);
+        float angleX = 0.5 * (k%50 < 25) ? glm::sin(glm::degrees(glfwGetTime() * directionX * 10)) : glm::tan(glm::degrees(glfwGetTime() * directionX * 10));//glm::sin(k/5);
+        float angleY = 0.5 * (k%50 < 25) ? glm::sin(glm::degrees(glfwGetTime() * directionY * 10)) : glm::cos(glm::degrees(glfwGetTime() * directionY * 10));//glm::sin(glm::degrees(glfwGetTime() * directionY));//glm::sin(k/5);
+        float angleZ = 0.5 * (k%50 < 25) ? glm::tan(glm::degrees(glfwGetTime() * directionZ * 10)) : glm::tan(glm::degrees(glfwGetTime() * directionZ * 10)); // glm::sin(glm::degrees(glfwGetTime() * directionZ));//glm::sin(k/5);
+
+        // model = glm::rotate(model, glm::radians(angleX), glm::vec3(1.0f, 0.0f, 0.0f));
+        // model = glm::rotate(model, glm::radians(angleY), glm::vec3(0.0f, 1.0f, 0.0f));
+        // model = glm::rotate(model, glm::radians(angleZ), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        // model = glm::translate(model, glm::vec3(0.0,0.0,deep));
+
+        glm::vec4 xyzd(angleX, angleY, angleZ, deep);
+
+        frames.push_back(xyzd);
     }
 
+
+    std::cout << glfwGetTime() << std::endl;
+
+    int framesCount = 0;
+    std::deque<glm::mat4> matrixFrames;
+    std::deque<glm::vec3> colorFrames;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -318,19 +341,21 @@ int main(int argc, char** argv)
         glClearColor(0,0,0,1); // цвет фона
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        const float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
+        // const float radius = 10.0f;
+        // float camX = sin(glfwGetTime()) * radius;
+        // float camZ = cos(glfwGetTime()) * radius;
         
         // активируем шейдер
         firstShader.use();
 
         // передаем шейдеру матрицу проекции (поскольку проекционная матрица редко меняется, то нет необходимости делать это для каждого кадра)
-        projection = glm::perspective(glm::radians(camera.Zoom), (float)windowSizeX/(float)windowSizeY, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)windowSizeX/(float)windowSizeY, 0.1f, 800.0f);
 
         //                              положение камеры             целевая позиция               вектор-вверх
         // view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f),  glm::vec3(0.0f, 1.0f, 0.0f));
-        view = camera.GetViewMatrix(); 
+        
+
+        view = camera.GetViewMatrix();
 
         //view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
         
@@ -350,18 +375,45 @@ int main(int argc, char** argv)
         // glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
  
 
-        glm::vec3 setColor = glm::vec3(rainbow.setFrameColor()[Chanel.R],rainbow.setFrameColor()[Chanel.G],rainbow.setFrameColor()[Chanel.B]);
-        rainbow.twistFrameColors(10);
-        int setColorLoc = glGetUniformLocation(firstShader.ID, "setColor");
-        glUniform3fv(setColorLoc, 1, glm::value_ptr(setColor));
+        
  
 
         firstShader.use();
         glBindVertexArray(VAO);
         glLineWidth(2);
 
+        if(framesCount < numberOfFrames)
+        {
+            framesCount++;
+        }
+        else
+        {
+            framesCount = 0;
+        }
+
         
-        for(int k = 0; k < numberOfFrames; k++)
+        model = glm::rotate(model, glm::radians(frames.at(framesCount).x), glm::vec3(0.5f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(frames.at(framesCount).y), glm::vec3(0.0f, 0.5f, 0.0f));
+        model = glm::rotate(model, glm::radians(frames.at(framesCount).z), glm::vec3(0.0f, 0.0f, 0.5f));
+
+        model = glm::translate(model, glm::vec3(0.0, 0.0, frames.at(framesCount).a));
+
+        matrixFrames.push_back(model);
+
+        glm::vec3 setColor = glm::vec3(rainbow.setFrameColor()[Chanel.R],rainbow.setFrameColor()[Chanel.G],rainbow.setFrameColor()[Chanel.B]);
+        colorFrames.push_back(setColor);
+        rainbow.twistFrameColors(10);
+
+        // camera.Position.z += frames.at(framesCount).a;
+        // //camera.Yaw = glm::radians(frames.at(framesCount).y);
+        // camera.Pitch = glm::radians(frames.at(framesCount).x);
+
+
+
+        //view = glm::translate(view, glm::vec3(1.0f, 0.0f, 0.0f));
+
+
+        for(int k = 0; k < framesCount; k++)
         {
             //float deep = -1 + 1/(k+1);
             //float angle = 10 * sin(glfwGetTime());//glm::sin(k/5);
@@ -369,8 +421,13 @@ int main(int argc, char** argv)
             //model = glm::rotate(frames.at(k), glm::radians(angle), glm::vec3(0.2f, 0.2f, 0.2f));
             //model = glm::translate(frames.at(k), glm::vec3(0.0,0.0,deep*2));
 
-            firstShader.setMat4("model", frames.at(k));
-        
+            firstShader.setVec3("setColor", colorFrames.at(k));
+            // int setColorLoc = glGetUniformLocation(firstShader.ID, "setColor");
+            // glUniform3fv(setColorLoc, 1, glm::value_ptr(setColor));
+
+            firstShader.setMat4("model", matrixFrames.at(k));
+            // firstShader.setMat4("view", view);
+
             glDrawArrays(GL_LINE_LOOP, 0, 4);
         }
 
